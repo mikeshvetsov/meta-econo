@@ -8,12 +8,26 @@ inherit kernel
 
 SUMMARY = "Linux Kernel for F&S i.MX6-based boards and modules"
 
+require recipes-kernel/linux/linux-dtb.inc
+
 DEPENDS += "lzop-native bc-native"
 
-COMPATIBLE_MACHINE = "(mx6|mx7)"
+COMPATIBLE_MACHINE = "(mx6)"
 
-SRC_URI = "file://linux-4.9.88-fus.tar.bz2"
-S = "${WORKDIR}/linux-4.9.88-fus"
+SRC_URI = "git://github.com/beserviceos/linux-fs.git;protocol=git"
+SRCREV = "27e94fa8f64c176f87a9531dabaca276165a22c9"
+
+S = "${WORKDIR}/git"
+
+SRC_URI += "file://patch-4.1.15-rt18.patch \
+            file://0001-fix-build.patch \
+            file://0002-no-split-ptlocks.patch \
+            file://0003-Work-around-CPU-stalls-in-the-imx-sdma-driver.patch \
+            file://defconfig \
+           "
+
+
+PV = "1.0"
 
 # We need to pass it as param since kernel might support more then one
 # machine, with different entry points
@@ -24,15 +38,19 @@ FSCONFIG_mx6sx = "fsimx6sx_defconfig"
 FSCONFIG_mx6ul = "fsimx6ul_defconfig"
 FSCONFIG_mx7ulp = "fsimx7ulp_defconfig"
 
+
+MACHINE_USES_VIVANTE_KERNEL_DRIVER_MODULE = "0"
+
+
+#do_extraunpack () {
+#	mv ${WORKDIR}/linux-fus/* ${S}/
+#}
+
+
+#kernel_do_configure_prepend() {
+#	install -m 0644 ${S}/arch/${ARCH}/configs/${FSCONFIG} ${WORKDIR}/defconfig
+#}
+
 # Prevent the galcore-module from beeing build, because it is already
 # included in the F&S-Linux-Kernel as a build-in
 RPROVIDES_kernel-image += "kernel-module-imx-gpu-viv"
-
-do_extraunpack () {
-	mv ${WORKDIR}/linux-fus/* ${S}/
-}
-
-
-kernel_do_configure_prepend() {
-	install -m 0644 ${S}/arch/${ARCH}/configs/${FSCONFIG} ${WORKDIR}/defconfig
-}

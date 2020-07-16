@@ -1,0 +1,9 @@
+[Match]
+Name=eth1
+
+[Network]
+DHCP=no
+
+IPv6PrivacyExtensions=false
+Address=192.168.0.201/24
+Gateway=192.168.0.1 
